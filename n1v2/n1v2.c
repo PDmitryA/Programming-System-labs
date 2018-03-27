@@ -1,6 +1,6 @@
 #include <unistd.h>
 #include <stdio.h>
-
+#include <sys/wait.h>
 
 int logicalExp(int a, int b, int c){
 	return (a && b) || (a && !c);
@@ -19,5 +19,6 @@ int main(){
 	b = fork();
 	c = fork();
 	printLogicalExp(a, b, c);
+	wait(NULL);
 	return 0;
 }
