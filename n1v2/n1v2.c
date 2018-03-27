@@ -15,41 +15,9 @@ int printLogicalExp(int a, int b, int c){
 
 int main(){
 	pid_t a = 0, b = 0, c = 0;
-	if (a = fork()){
-		if (b = fork()){
-			if (c = fork()){
-				printLogicalExp(a, b, c);
-			}
-			else {
-			printLogicalExp(a, b, c);
-			}
-		}
-		else {
-			if (c = fork()){
-				printLogicalExp(a, b, c);
-			}
-			else {
-			printLogicalExp(a, b, c);
-			}
-		}
-	}
-	else {
-		if (b = fork()){
-			if (c = fork()){
-				printLogicalExp(a, b, c);
-			}
-			else {
-			printLogicalExp(a, b, c);
-			}
-		}
-		else {
-			if (c = fork()){
-				printLogicalExp(a, b, c);
-			}
-			else {
-			printLogicalExp(a, b, c);
-			}
-		}
-	}
+	a = fork();
+	b = fork();
+	c = fork();
+	printLogicalExp(a, b, c);
 	return 0;
 }
