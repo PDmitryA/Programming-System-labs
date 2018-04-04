@@ -48,8 +48,8 @@ void* next_time_t_thread(void* arg) {
 		}
 		
 		pthread_barrier_wait(data->syncLayer);
-		/*perror("Sync");
-		pthread_barrier_wait(data->syncLayer);*/
+		/*perror("Sync");*/
+		pthread_barrier_wait(data->syncLayer);
 	}
 	return NULL;
 }
@@ -74,78 +74,88 @@ void init() {
 
 int main(int argc, char const *argv[]) {
 	
-	// Initialize N, M, T, a, dx, dy, dz, dt and allocate memory for matrix.
-	init();
+    // Initialize N, M, T, a, dx, dy, dz, dt and allocate memory for matrix.
+    init();
 
-	int threadCount;
-	pthread_t* threads = NULL;
-	ThreadRecord* args = NULL;
-	pthread_barrier_t syncLayer;
-	pthread_attr_t pattr;
+    int threadCount;
+    pthread_t* threads = NULL;
+    ThreadRecord* args = NULL;
+    pthread_barrier_t syncLayer;
+    pthread_attr_t pattr;
 
-	// Initialize attributes
-	pthread_attr_init(&pattr);
-	pthread_attr_setscope(&pattr, PTHREAD_SCOPE_SYSTEM);
-	pthread_attr_setdetachstate(&pattr, PTHREAD_CREATE_JOINABLE);
+    // Initialize attributes
+    pthread_attr_init(&pattr);
+    pthread_attr_setscope(&pattr, PTHREAD_SCOPE_SYSTEM);
+    pthread_attr_setdetachstate(&pattr, PTHREAD_CREATE_JOINABLE);
 
-	// How much threads will be?
-	printf("How much threads you want?\n");
-	scanf("%d", &threadCount);
+    // How much threads will be?
+    printf("How much threads you want?\n");
+    scanf("%d", &threadCount);
 
-	int elemOnThread = N * M / threadCount;
+    int elemOnThread = N * M / threadCount;
 
-	if (elemOnThread * threadCount != N * M) {
-		fprintf(stderr, "Thread count must be a multiple of N*M! Exit...\n");
-		exit(2);
-	}
-	
-	pthread_barrier_init(&syncLayer, NULL, threadCount);
-
-	args = (ThreadRecord*) calloc(threadCount, sizeof(ThreadRecord));
-	threads = (pthread_t*) calloc(threadCount, sizeof(pthread_t));
-
-	for (int c = 0; c < threadCount; c++) {
-		args[c].syncLayer = &syncLayer;
-		args[c].ij[0] = elemOnThread * c + 1;
-		args[c].ij[1] = elemOnThread * (c + 1);
-	}
-
-	//perror("Arguments are initialized");
-	for (int c = 0; c < threadCount; c++) {
-		if (pthread_create(&(threads[c]), &pattr, next_time_t_thread, (void *) &(args[c])))
-		    perror("pthread_create");
-	}
-
-
-	for (int c = 0; c < threadCount; c++) {
-        pthread_join(threads[c], NULL);
+    if (elemOnThread * threadCount != N * M) {
+	    fprintf(stderr, "Thread count must be a multiple of N*M! Exit...\n");
+	    exit(2);
     }
-    //pthread_barrier_destroy(&syncLayer);
+    
+    pthread_barrier_init(&syncLayer, NULL, threadCount+1);
 
+    args = (ThreadRecord*) calloc(threadCount, sizeof(ThreadRecord));
+    threads = (pthread_t*) calloc(threadCount, sizeof(pthread_t));
+
+    for (int c = 0; c < threadCount; c++) {
+	    args[c].syncLayer = &syncLayer;
+	    args[c].ij[0] = elemOnThread * c + 1;
+	    args[c].ij[1] = elemOnThread * (c + 1);
+    }
+
+    //perror("Arguments are initialized");
+    for (int c = 0; c < threadCount; c++) {
+	    if (pthread_create(&(threads[c]), &pattr, next_time_t_thread, (void *) &(args[c])))
+		perror("pthread_create");
+    }
+	
     FILE * gnuplotPipe = popen("gnuplot -persistent", "w");
+    fprintf(gnuplotPipe, "set terminal gif animate delay 50\n");
+    fprintf(gnuplotPipe, "set output 'animate3.gif'\n");
+    
     fprintf(gnuplotPipe, "set ticslevel 0\n");
     //fprintf(gnuplotPipe, "set dgrid3d 40, 40 splines\n");
-    
+    fprintf(gnuplotPipe, "set xrange[0:%d]\n", N-1);
+    fprintf(gnuplotPipe, "set yrange[0:%d]\n", M-1);
     
     fprintf(gnuplotPipe, "set dgrid3d\n");
     fprintf(gnuplotPipe, "set hidden3d\n");
-    fprintf(gnuplotPipe, "splot '-' using 1:2:3 with lines\n");
-    for (int i = 0; i < N; ++i) {
-		for (int j = 0; j < M; ++j) {
-			fprintf(gnuplotPipe, "%lf %lf %lf\n", (double)i, (double)j, matrix[i][j][(T+1)%3]);
-		}
+    
+    fprintf(gnuplotPipe, "do for [i=1:%d] {\n", T);
+    fprintf(gnuplotPipe, "splot '-' with lines\n");
+    fprintf(gnuplotPipe, "}\n");
+
+    for (int k = 1; k < T; ++k) {
+	pthread_barrier_wait(&syncLayer);
+	for (int i = 0; i < N; ++i) {
+	    for (int j = 0; j < M; ++j) {
+	      //fprintf(stderr, "%lf %lf %lf\n", (double)i, (double)j, matrix[i][j][(T+1)%3]);
+	      fprintf(gnuplotPipe, "%lf %lf %lf\n", (double)i, (double)j, matrix[i][j][(k+1)%3]);
+	    }
 	}
 	fprintf(gnuplotPipe, "e\n");
-	fprintf(gnuplotPipe, "replot\n");
-	
-	
+	pthread_barrier_wait(&syncLayer);
+    }
+    pclose(gnuplotPipe);
 
-	/*for (int i = 0; i < N; ++i) {
-		for (int j = 0; j < M; ++j) {
-			printf("%.2lf ", matrix[i][j][(T+1)%3]);
-		}
-		printf("\n");
-	}*/
+    for (int c = 0; c < threadCount; c++) {
+    pthread_join(threads[c], NULL);
+    }
+    //pthread_barrier_destroy(&syncLayer);
 
-	return 0;
+    for (int i = 0; i < N; ++i) {
+	for (int j = 0; j < M; ++j) {
+	    printf("%lf, %lf, %.2lf \n",(double)i, (double)j, matrix[i][j][(T+1)%3]);
+	}
+	printf("\n");
+    }
+
+    return 0;
 }
