@@ -14,8 +14,11 @@ double a = 1;
 double*** matrix;
 int N = 0, M = 0, T = 0;
 
-double force_impact(double x, double y, double z) {
-	return 1;
+double force_impact(double x, double y, double t) {
+  if ((int)(t * 5 / T) % 2)
+    return 1;
+  return -1;
+	//return 1;
 }
 
 double next_time_x(double z20, double z10, double z00) {
@@ -124,6 +127,7 @@ int main(int argc, char const *argv[]) {
     //fprintf(gnuplotPipe, "set dgrid3d 40, 40 splines\n");
     fprintf(gnuplotPipe, "set xrange[0:%d]\n", N-1);
     fprintf(gnuplotPipe, "set yrange[0:%d]\n", M-1);
+    fprintf(gnuplotPipe, "set zrange[-0.2:0]\n");
     
     fprintf(gnuplotPipe, "set dgrid3d\n");
     fprintf(gnuplotPipe, "set hidden3d\n");
