@@ -116,7 +116,9 @@ int main(int argc, char const *argv[]) {
 	    args[c].ij[0] = elemOnThread * c + 1;
 	    args[c].ij[1] = elemOnThread * (c + 1);
     }
-    clock_t begin = clock();
+    struct timeval  tv1, tv2;
+	gettimeofday(&tv1, NULL);
+    //clock_t begin = clock();
     //perror("Arguments are initialized");
     for (int c = 0; c < threadCount; c++) {
 	    if (pthread_create(&(threads[c]), &pattr, next_time_t_thread, (void *) &(args[c])))
@@ -141,16 +143,16 @@ int main(int argc, char const *argv[]) {
     fprintf(gnuplotPipe, "}\n");
 */
     for (int k = 1; k < T; ++k) {
-	pthread_barrier_wait(&syncLayer);
-	printf("%d\n", k);
-	/*for (int i = 0; i < N; ++i) {
-	    for (int j = 0; j < M; ++j) {
-	      //fprintf(stderr, "%lf %lf %lf\n", (double)i, (double)j, matrix[i][j][(T+1)%3]);
-	      fprintf(gnuplotPipe, "%lf %lf %lf\n", (double)i, (double)j, matrix[i][j][(k+1)%3]);
-	    }
-	}
-	fprintf(gnuplotPipe, "e\n");*/
-	pthread_barrier_wait(&syncLayer);
+		pthread_barrier_wait(&syncLayer);
+		fprintf(stderr, "|");
+		/*for (int i = 0; i < N; ++i) {
+		    for (int j = 0; j < M; ++j) {
+		      //fprintf(stderr, "%lf %lf %lf\n", (double)i, (double)j, matrix[i][j][(T+1)%3]);
+		      fprintf(gnuplotPipe, "%lf %lf %lf\n", (double)i, (double)j, matrix[i][j][(k+1)%3]);
+		    }
+		}
+		fprintf(gnuplotPipe, "e\n");*/
+		pthread_barrier_wait(&syncLayer);
     }
     /*pclose(gnuplotPipe);*/
 
@@ -158,9 +160,13 @@ int main(int argc, char const *argv[]) {
     pthread_join(threads[c], NULL);
     }
     //pthread_barrier_destroy(&syncLayer);
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("TIME: %lf", time_spent);
+    //clock_t end = clock();
+    gettimeofday(&tv2, NULL);
+    printf ("\nTotal time = %f seconds\n",
+         (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+         (double) (tv2.tv_sec - tv1.tv_sec));
+    //double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    //printf("TIME: %lf\n", time_spent);
     for (int i = 0; i < N; ++i) {
 	for (int j = 0; j < M; ++j) {
 	    //printf("%lf, %lf, %.2lf \n",(double)i, (double)j, matrix[i][j][(T+1)%3]);
