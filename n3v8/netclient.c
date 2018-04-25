@@ -7,10 +7,10 @@
 #include <netdb.h> 
 #include <arpa/inet.h>
 
-#define BUF_SIZE 256
+#define BUF_SIZE 2048
 
 int command(int sock, char* buf, char* command, char* userSeeStr, int userInput) {
-    int goodAnswer = 0;
+    char* goodAnswer = NULL;
     int commandLen = strlen(command);
     memset(buf, 0, BUF_SIZE);
     strcpy(buf, command);
@@ -21,11 +21,11 @@ int command(int sock, char* buf, char* command, char* userSeeStr, int userInput)
     write(sock, buf, strlen(buf));
     memset(buf, 0, BUF_SIZE);
     read(sock, buf, BUF_SIZE-1);
-    goodAnswer = sscanf(buf, "+OK %s", buf);
-    if (goodAnswer < 1) {
-        int badAnswer = 0;
-        badAnswer = sscanf(buf, "-ERR %s", buf);
-        if (badAnswer < 1)
+    goodAnswer = strstr(buf, "+OK");
+    if (goodAnswer == NULL) {
+        char* badAnswer = NULL;
+        badAnswer = strstr(buf, "-ERR");
+        if (badAnswer == NULL)
             printf("Bad formatted server reply:\n");
         printf("%s\n", buf);
         return -1;
@@ -44,6 +44,9 @@ int login(int sock, char* buf)
     if (command(sock, buf, passwordCommand, "Enter the password: ", 1) < 0) {
         return -1;
     }
+    memset(buf, 0, BUF_SIZE);
+    read(sock, buf, BUF_SIZE-1);
+    printf("%s\n", buf);
     return 0;
 }
 
@@ -63,6 +66,10 @@ int stat(int sock, char* buf)
     if (command(sock, buf, userCommand, "All your mail contains: ", 0) < 0) {
         return -1;
     }
+    /*
+    memset(buf, 0, BUF_SIZE);
+    printf("%s\n", buf);
+    */
     return 0;
 }
 
@@ -72,6 +79,9 @@ int list(int sock, char* buf)
     if (command(sock, buf, userCommand, "Enter the message id (if empty get all): ", 1) < 0) {
         return -1;
     }
+    memset(buf, 0, BUF_SIZE);
+    read(sock, buf, BUF_SIZE-1);
+    printf("%s\n", buf);
     return 0;
 }
 
@@ -81,6 +91,9 @@ int retr(int sock, char* buf)
     if (command(sock, buf, userCommand, "Enter the reading message id: ", 1) < 0) {
         return -1;
     }
+    memset(buf, 0, BUF_SIZE);
+    read(sock, buf, BUF_SIZE-1);
+    printf("%s\n", buf);
     return 0;
 }
 

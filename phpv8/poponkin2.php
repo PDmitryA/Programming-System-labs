@@ -31,10 +31,15 @@ header("Content-type: image/png");
 $img = @imagecreate($imgX, $imgY)
     or die("Cannot Initialize new GD image stream");
     
-$background_color = imagecolorallocate($img, 255, 0, 255);
+$background_color = imagecolorallocate($img, 0, 0, 0);
 
 $colorArray = array(
     "steel" => imagecolorallocate($img, 233, 14, 91),
+    "aluminium" => imagecolorallocate($img, 0, 14, 91),
+    "concrete" => imagecolorallocate($img, 23, 145, 20),
+    "duraluminium" => imagecolorallocate($img, 80, 80, 80),
+    "titanium" => imagecolorallocate($img, 255, 255, 255),
+    "brass" => imagecolorallocate($img, 100, 100, 100),
     "default" => imagecolorallocate($img, 100, 255, 255)
 );
 
