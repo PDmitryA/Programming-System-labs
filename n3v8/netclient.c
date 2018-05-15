@@ -21,7 +21,6 @@ int command(int sock, char* buf, char* command, char* userSeeStr, int userInput)
     }
     write(sock, buf, strlen(buf));
     memset(buf, 0, BUF_SIZE);
-<<<<<<< HEAD
     int maxBufStr = BUF_SIZE - 1;
 	int len = 0;
 	ioctl(sock, FIONREAD, &len);
@@ -33,19 +32,6 @@ int command(int sock, char* buf, char* command, char* userSeeStr, int userInput)
 	  	len -= toRead;
 	}
 	write(1, "\n", 1);
-=======
-    read(sock, buf, BUF_SIZE-1);
-    goodAnswer = strstr(buf, "+OK");
-    if (goodAnswer == NULL) {
-        char* badAnswer = NULL;
-        badAnswer = strstr(buf, "-ERR");
-        if (badAnswer == NULL)
-            printf("Bad formatted server reply:\n");
-        printf("%s\n", buf);
-        return -1;
-    }
-    printf("%s\n", buf);
->>>>>>> 73fbf22ec7fde644e8cec79353884ada10d4e7bb
     return 0;
 }
 
@@ -53,21 +39,8 @@ void login(int sock, char* buf)
 {
     static char* userCommand = "USER ";
     static char* passwordCommand = "PASS ";
-<<<<<<< HEAD
     command(sock, buf, userCommand, "Enter the username: ", 1);
     command(sock, buf, passwordCommand, "Enter the password: ", 1);
-=======
-    if (command(sock, buf, userCommand, "Enter the username: ", 1) < 0) {
-        return -1;
-    }
-    if (command(sock, buf, passwordCommand, "Enter the password: ", 1) < 0) {
-        return -1;
-    }
-    memset(buf, 0, BUF_SIZE);
-    read(sock, buf, BUF_SIZE-1);
-    printf("%s\n", buf);
-    return 0;
->>>>>>> 73fbf22ec7fde644e8cec79353884ada10d4e7bb
 }
 
 void quit(int sock, char* buf)
@@ -80,50 +53,19 @@ void quit(int sock, char* buf)
 void stat(int sock, char* buf)
 {
     static char* userCommand = "STAT";
-<<<<<<< HEAD
     command(sock, buf, userCommand, "All your mail contains: ", 0);
-=======
-    if (command(sock, buf, userCommand, "All your mail contains: ", 0) < 0) {
-        return -1;
-    }
-    /*
-    memset(buf, 0, BUF_SIZE);
-    printf("%s\n", buf);
-    */
-    return 0;
->>>>>>> 73fbf22ec7fde644e8cec79353884ada10d4e7bb
 }
 
 void list(int sock, char* buf)
 {
     static char* userCommand = "LIST ";
-<<<<<<< HEAD
     command(sock, buf, userCommand, "Enter the message id (if empty get all): ", 1);
-=======
-    if (command(sock, buf, userCommand, "Enter the message id (if empty get all): ", 1) < 0) {
-        return -1;
-    }
-    memset(buf, 0, BUF_SIZE);
-    read(sock, buf, BUF_SIZE-1);
-    printf("%s\n", buf);
-    return 0;
->>>>>>> 73fbf22ec7fde644e8cec79353884ada10d4e7bb
 }
 
 int retr(int sock, char* buf)
 {
     static char* userCommand = "RETR ";
-<<<<<<< HEAD
     command(sock, buf, userCommand, "Enter the reading message id: ", 1);
-=======
-    if (command(sock, buf, userCommand, "Enter the reading message id: ", 1) < 0) {
-        return -1;
-    }
-    memset(buf, 0, BUF_SIZE);
-    read(sock, buf, BUF_SIZE-1);
-    printf("%s\n", buf);
-    return 0;
->>>>>>> 73fbf22ec7fde644e8cec79353884ada10d4e7bb
 }
 
 int main(int argc, char ** argv)
