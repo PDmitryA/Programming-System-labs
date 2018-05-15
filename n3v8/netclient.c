@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <netdb.h> 
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
 
 #define BUF_SIZE 256
 
@@ -20,68 +21,51 @@ int command(int sock, char* buf, char* command, char* userSeeStr, int userInput)
     }
     write(sock, buf, strlen(buf));
     memset(buf, 0, BUF_SIZE);
-    read(sock, buf, BUF_SIZE-1);
-    goodAnswer = sscanf(buf, "+OK %s", buf);
-    if (goodAnswer < 1) {
-        int badAnswer = 0;
-        badAnswer = sscanf(buf, "-ERR %s", buf);
-        if (badAnswer < 1)
-            printf("Bad formatted server reply:\n");
-        printf("%s\n", buf);
-        return -1;
-    }
-    printf("%s\n", buf);
+    int maxBufStr = BUF_SIZE - 1;
+	int len = 0;
+	ioctl(sock, FIONREAD, &len);
+	while (len > 0) {
+		int toRead = len > maxBufStr ? maxBufStr : len;
+	  	toRead = read(sock, buf, toRead);
+	  	write(1, buf, toRead);
+	  	memset(buf, 0, BUF_SIZE);
+	  	len -= toRead;
+	}
+	write(1, "\n", 1);
     return 0;
 }
 
-int login(int sock, char* buf)
+void login(int sock, char* buf)
 {
     static char* userCommand = "USER ";
     static char* passwordCommand = "PASS ";
-    if (command(sock, buf, userCommand, "Enter the username: ", 1) < 0) {
-        return -1;
-    }
-    if (command(sock, buf, passwordCommand, "Enter the password: ", 1) < 0) {
-        return -1;
-    }
-    return 0;
+    command(sock, buf, userCommand, "Enter the username: ", 1);
+    command(sock, buf, passwordCommand, "Enter the password: ", 1);
 }
 
-int quit(int sock, char* buf)
+void quit(int sock, char* buf)
 {
     int goodAnswer = 0;
     static char* userCommand = "QUIT";
-    if (command(sock, buf, userCommand, "Bye!\n", 0) < 0) {
-        exit(-1);
-    }
-    exit(0);
+    command(sock, buf, userCommand, "Bye!\n", 0);
 }
 
-int stat(int sock, char* buf)
+void stat(int sock, char* buf)
 {
     static char* userCommand = "STAT";
-    if (command(sock, buf, userCommand, "All your mail contains: ", 0) < 0) {
-        return -1;
-    }
-    return 0;
+    command(sock, buf, userCommand, "All your mail contains: ", 0);
 }
 
-int list(int sock, char* buf)
+void list(int sock, char* buf)
 {
     static char* userCommand = "LIST ";
-    if (command(sock, buf, userCommand, "Enter the message id (if empty get all): ", 1) < 0) {
-        return -1;
-    }
-    return 0;
+    command(sock, buf, userCommand, "Enter the message id (if empty get all): ", 1);
 }
 
 int retr(int sock, char* buf)
 {
     static char* userCommand = "RETR ";
-    if (command(sock, buf, userCommand, "Enter the reading message id: ", 1) < 0) {
-        return -1;
-    }
-    return 0;
+    command(sock, buf, userCommand, "Enter the reading message id: ", 1);
 }
 
 int main(int argc, char ** argv)
