@@ -21,15 +21,16 @@ int command(int sock, char* buf, char* command, char* userSeeStr, int userInput)
     }
     write(sock, buf, strlen(buf));
     memset(buf, 0, BUF_SIZE);
+    usleep(1000);
     int maxBufStr = BUF_SIZE - 1;
-	int len = 0;
-	ioctl(sock, FIONREAD, &len);
-	while (len > 0) {
-		int toRead = len > maxBufStr ? maxBufStr : len;
-	  	toRead = read(sock, buf, toRead);
-	  	write(1, buf, toRead);
-	  	memset(buf, 0, BUF_SIZE);
-	  	len -= toRead;
+	int len = 1;
+	while(len > 0) {
+	  ioctl(sock, FIONREAD, &len);
+	  if (len < 1)
+	    break;
+	  len = recv(sock, buf, sizeof(maxBufStr), 0);
+	  printf("%s", buf);
+	  memset(buf, 0, BUF_SIZE);
 	}
 	write(1, "\n", 1);
     return 0;
