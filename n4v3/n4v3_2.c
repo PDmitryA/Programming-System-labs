@@ -76,7 +76,7 @@ void solve(double *a1, double *a0, double *a_neighbour_up, double *a_neighbour_d
 				a1[i*n + j] = AT*HT*( (a0[i*n + (j+1)] - 2*a0[i*n + j] + a0[i*n + (j-1)])/(HX*HX) + (a0[(i+1)*n + j] - 2*a0[i*n + j] + a_neighbour_up[j])/(HY*HY)) + a0[i*n + j];
 				continue;
 			}
-			a1[i*n + j] = AT*HT*( (a0[i*n + (j+1)] - 2*a0[i*n + j] + a0[i*n + (j1)])/(HX*HX) + (a0[(i+1)*n + j] - 2*a0[i*n + j] + a0[(i-1)*n + j])/(HY*HY)) + a0[i*n + j];
+			a1[i*n + j] = AT*HT*( (a0[i*n + (j+1)] - 2*a0[i*n + j] + a0[i*n + (j+1)])/(HX*HX) + (a0[(i+1)*n + j] - 2*a0[i*n + j] + a0[(i-1)*n + j])/(HY*HY)) + a0[i*n + j];
 		}
 	}
 	if(myrank == 0)
