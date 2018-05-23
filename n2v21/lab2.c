@@ -127,7 +127,7 @@ int main(int argc, char const *argv[]) {
     //fprintf(gnuplotPipe, "set dgrid3d 40, 40 splines\n");
     fprintf(gnuplotPipe, "set xrange[0:%d]\n", N-1);
     fprintf(gnuplotPipe, "set yrange[0:%d]\n", M-1);
-    fprintf(gnuplotPipe, "set zrange[-0.2:0]\n");
+    fprintf(gnuplotPipe, "set zrange[-12:0]\n");
     
     fprintf(gnuplotPipe, "set dgrid3d\n");
     fprintf(gnuplotPipe, "set hidden3d\n");
@@ -154,12 +154,12 @@ int main(int argc, char const *argv[]) {
     }
     //pthread_barrier_destroy(&syncLayer);
 
-    for (int i = 0; i < N; ++i) {
+    /*for (int i = 0; i < N; ++i) {
 	for (int j = 0; j < M; ++j) {
 	    printf("%lf, %lf, %.2lf \n",(double)i, (double)j, matrix[i][j][(T+1)%3]);
 	}
 	printf("\n");
-    }
+    }*/
 
     return 0;
 }
